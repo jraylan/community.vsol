@@ -181,7 +181,10 @@ class TerminalModule(TerminalBase):
 
         if (
             prompt is None
-            or not prompt.endswith(b"#")
+            or not (
+                prompt.endswith(b"#")
+                or prompt.endswith(b"# ")
+            )
             or privilege_level != 15
         ):
             raise AnsibleConnectionFailure(
