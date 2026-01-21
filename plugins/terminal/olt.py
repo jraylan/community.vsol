@@ -127,9 +127,10 @@ class TerminalModule(TerminalBase):
         return (
             self._connection.become.get_option(
                 'become_pass',
-                playcontext=self._connection._play_context,
-            ) or self._get_password()
-        )
+                playcontext=self._connection._play_context
+            )
+            if self._connection.become else None
+        ) or self._get_password()
 
     def _exec_login(self):
         prompt = self._get_prompt()
