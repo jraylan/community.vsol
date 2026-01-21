@@ -108,7 +108,9 @@ class TerminalModule(TerminalBase):
 
     def get_privilege_level(self):
         prompt = self._get_prompt()
-        return 1 + prompt.endswith(b"#") * 14
+        return 1 + (
+            prompt.endswith(b"#") or prompt.endswith(b"# ")
+        ) * 14
 
     def _get_user(self):
         return (
@@ -149,8 +151,10 @@ class TerminalModule(TerminalBase):
 
     def on_become(self, passwd=None):
         if (
-            self._get_prompt().endswith(b"#")
-            and self.get_privilege_level() == 15
+            (
+                self._get_prompt().endswith(b"#")
+                or self._get_prompt().endswith(b"# ")
+            ) and self.get_privilege_level() == 15
         ):
             return
 
