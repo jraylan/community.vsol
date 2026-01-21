@@ -112,12 +112,16 @@ class TerminalModule(TerminalBase):
 
     def _get_user(self):
         return (
-            getattr(self._connection, "user")
+            self._connection.get_option("remote_user")
+            or getattr(self._connection, "user", None)
             or self._connection._play_context.remote_user
         )
 
     def _get_password(self):
-        return self._connection._play_context.password
+        return (
+            self._connection.get_option("password")
+            or self._connection._play_context.password
+        )
 
     def _get_become_password(self):
         return (
