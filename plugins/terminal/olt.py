@@ -61,6 +61,10 @@ class TerminalModule(TerminalBase):
         re.compile(rb"\x1b\[\?1h\x1b="),  # CSI ? 1 h ESC =
         re.compile(rb"\x08."),  # [Backspace] .
         re.compile(rb"\x1b\[m"),  # ANSI reset code
+        re.compile(
+            rb"[\n\r]?^\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}\s+[A-Za-z]*.*$",
+            re.M,
+        ),  # Logging info
     ]
 
     terminal_stderr_re = [
