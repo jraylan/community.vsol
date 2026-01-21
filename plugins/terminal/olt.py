@@ -110,23 +110,41 @@ class TerminalModule(TerminalBase):
         prompt = self._get_prompt()
         return 1 + prompt.endswith(b"#") * 14
 
+    def _get_user(self):
+        return (
+            self._connection.get_option("username")
+            or getattr(self._connection, "user")
+            or self._connection._play_context.remote_user
+        )
+
+    def _get_password(self):
+        return (
+            self._connection.get_option("password")
+            or self._connection._play_context.password
+        )
+
+    def _get_become_password(self):
+        return (
+            self._connection.become.get_option(
+                'become_pass',
+                playcontext=self._connection._play_context,
+            ) or self._get_password()
+        )
+
     def _exec_login(self):
         prompt = self._get_prompt()
 
         if self.login_prompt.search(prompt):
-            username = self._connection.get_option("username")
-            self._exec_cli_command(to_bytes(username))
-
+            self._exec_cli_command(to_bytes(self._get_user()))
             prompt = self._get_prompt()
 
         if self.password_prompt.search(prompt):
-            password = self._connection.get_option("password")
-            self._exec_cli_command(to_bytes(password))
+            self._exec_cli_command(to_bytes(self._get_password()))
 
     def on_open_shell(self):
         self._exec_login()
         self._exec_cli_command(b"enable")
-        self._exec_login()
+        self.on_become(passwd=self._get_become_password())
         self._exec_cli_command(b"terminal length 0")
 
     def on_become(self, passwd=None):
