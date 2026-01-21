@@ -1,0 +1,28 @@
+---
+# See https://docs.ansible.com/ansible/latest/dev_guide/collections_galaxy_meta.html
+
+namespace: community
+name: vsol
+version: 0.1.0
+readme: README.md
+authors:
+  - Raylan (github.com/jraylan)
+dependencies:
+  "ansible.netcommon": ">=6.1.0"
+description: Modules and plugins for vsol devices
+license:
+  - GPL-3.0-or-later
+tags:
+# tags so people can search for collections https://galaxy.ansible.com/search
+# tags are all lower-case, no spaces, no dashes.
+  - network
+  - vsol
+  - olt
+repository: https://github.com/jraylan/community.vsol
+#documentation: https://github.com/ansible-collection-migration/community.vsol/tree/main/docs
+homepage: https://github.com/jraylan/community.vsol
+issues: https://github.com/jraylan/community.vsol/issues
+build_ignore:
+# https://docs.ansible.com/ansible/devel/dev_guide/developing_collections_distributing.html#ignoring-files-and-folders
+  - .gitignore
+  - changelogs/.plugin-cache.yaml
