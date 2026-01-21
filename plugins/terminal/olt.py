@@ -35,10 +35,25 @@ display = Display()
 
 
 class TerminalModule(TerminalBase):
+
+    login_prompt = re.compile(
+        rb"^[lL]ogin: ?$",
+        re.M,
+    )
+
+    password_prompt = re.compile(
+        rb"^[pP]assword: ?$",
+        re.M,
+    )
+
     terminal_stdout_re = [
         re.compile(
             rb"[\r\n]?^[\w\+\-\.:\/\[\]]+(?:\(config+\))?(?:[>#]) ?"
-            rb"(([^\r\n]+\x00)|)$", re.M),
+            rb"(([^\r\n]+\x00)|)$",
+            re.M,
+        ),
+        login_prompt,
+        password_prompt,
     ]
 
     #: compiled bytes regular expressions to remove ANSI codes
@@ -91,11 +106,24 @@ class TerminalModule(TerminalBase):
         prompt = self._get_prompt()
         return 1 + prompt.endswith(b"#") * 14
 
+    def _exec_login(self):
+        prompt = self._get_prompt()
+
+        if self.login_prompt.search(prompt):
+            username = self._connection.get_option("username")
+            self._exec_cli_command(to_bytes(username))
+
+            prompt = self._get_prompt()
+
+        if self.password_prompt.search(prompt):
+            password = self._connection.get_option("password")
+            self._exec_cli_command(to_bytes(password))
+
     def on_open_shell(self):
-        self._exec_cli_command(b"undo smart")
-        self._exec_cli_command(b"undo interactive")
-        self._exec_cli_command(b"scroll")
-        
+        self._exec_login()
+        self._exec_cli_command(b"enable")
+        self._exec_login()
+        self._exec_cli_command(b"terminal length 0")
 
     def on_become(self, passwd=None):
         if (
@@ -106,9 +134,9 @@ class TerminalModule(TerminalBase):
 
         cmd = {"command": "enable"}
         if passwd:
-            # Note: python-3.5 cannot combine u"" and r"" together.  Thus make
-            # an r string and use to_text to ensure it's text on both py2
-            # and py3.
+            # Note: python-3.5 cannot combine u"" and r"" together.
+            # Thus make an r string and use to_text to ensure it's text
+            # on both py2 and py3.
             cmd["prompt"] = to_text(
                 r"[\r\n]?(?:.*)?[Pp]assword: ?$",
                 errors="surrogate_or_strict",
@@ -148,6 +176,9 @@ class TerminalModule(TerminalBase):
 
         if self.get_privilege_level() != 15:
             return
+
+        if prompt.endswith(b"(config)#"):
+            self._exec_cli_command(b"quit")
 
         if prompt.endswith(b"#"):
             self._exec_cli_command(b"disable")
