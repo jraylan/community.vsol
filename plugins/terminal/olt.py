@@ -144,7 +144,6 @@ class TerminalModule(TerminalBase):
 
     def on_open_shell(self):
         self._exec_login()
-        self._exec_cli_command(b"enable")
         self.on_become(passwd=self._get_become_password())
         self._exec_cli_command(b"terminal length 0")
 
